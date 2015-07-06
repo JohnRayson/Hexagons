@@ -115,7 +115,7 @@ game.generateRandomGrid = function(map, width, height)
             {
                 map._hexs[x][y] = ["grass"];
                 if (rand < 0.05)
-                    game.map.addAsset(x, y, "dwarf-spear");
+                    game.map._troops.push(new game.troop(x, y, "dwarf-spear"));
             }
             else if (rand < 0.8)
                 map._hexs[x][y] = ["grass", "forest"];
@@ -167,13 +167,22 @@ game.hexClicked = function (pos)
 
     if (game.map.hexContains(pos.x, pos.y, "dwarf-spear"))
     {
-        var movement = game.map._tiles._asset["dwarf-spear"].move;
-        var neighbours = game.map.getNeighbours(pos.x, pos.y, movement);
+        var troop = null;
+        for (var i = 0; i < game.map._troops.length; i++)
+        {
+            if (pos.x == game.map._troops[i].x && pos.y == game.map._troops[i].y)
+            {
+                troop = game.map._troops[i];
+                break;
+            }
+        }
 
-        game.action = { "_type": "move", "origin": pos, "neighbours": neighbours };
+        var neighbours = game.map.getNeighbours(pos.x, pos.y, troop._remainingMoves);
+
+        game.action = { "_type": "move", "origin": pos, "neighbours": neighbours, "troop": troop };
         for (var i = 0; i < neighbours.length; i++)
         {
-            if (neighbours[i]) // && !game.map.hexContains(neighbours[i].x, neighbours[i].y, "water"))
+            if (neighbours[i])
                 game.map.drawOverlay("white", neighbours[i].x, neighbours[i].y);
         }
         return true;
@@ -198,12 +207,25 @@ game.spriteSheet = function (parent, url, rowWidth, colWidth, loaded)
     this._img.src = this._url;
 }
 
+game.troop = function (x, y, name)
+{
+    this.x = x;
+    this.y = y;
+
+    this._id = utils.createUUID();
+    this._assetName = name;
+    this._remainingMoves = null;
+
+    game.map.addAsset(x, y, name)
+}
+
 game.mapObj = function (elId)
 {
     this._debug = false;
     this._element = document.getElementById(elId);
     this._tiles = null;
     this._hexs = null;
+    this._troops = [];
     this._origin = { "x": 0, "y": 0 };
     this._season = 0; // 0=spring, 1=summer, 2=autumn, 3=winter;
 
