@@ -9,10 +9,18 @@ $(document).ready(function ()
     game.map = new game.mapObj("map");
     game.loadMap();
 
+    $("#debugToggle").click(function ()
+    {
+        game.debug = !game.debug;
+        game.map.drawGrid();
+    });
     $("#clearDebug").click(function ()
     {
         $("#debugDisplay").html("");
     });
+
+    game.test.runAtStartup();
+
 }).on("contextmenu", function ()
 {
     return false;
@@ -21,6 +29,8 @@ $(document).ready(function ()
 Namespace("game");
 game.map = null;
 game.action = null;
+game.distSrc = null;
+game.debug = false;
 
 game.loadMap = function()
 {
@@ -31,21 +41,25 @@ game.loadMap = function()
         var rowHeight = sheet._rowHeight;
         var colWidth = sheet._colWidth;
 
-        game.map._tiles._asset["grass"] = $.extend(game.map._tiles._asset["grass"], game.assetObj, {  type: "land", move: 1,  clipWidth: colWidth, clipHeight: rowHeight });
-        game.map._tiles._asset["forest"] = $.extend(game.map._tiles._asset["forest"], game.assetObj, { type: "land", move: 1,  clipY: (rowHeight * 1), clipWidth: colWidth, clipHeight: rowHeight });
-        game.map._tiles._asset["water"] = $.extend(game.map._tiles._asset["water"], game.assetObj, {  type: "land", move: 100, clipY: (rowHeight * 2), clipWidth: colWidth, clipHeight: rowHeight });
+        game.map._tiles._asset["grass"] = $.extend(game.map._tiles._asset["grass"], game.asset.obj, { type: "land", move: 1, clipWidth: colWidth, clipHeight: rowHeight });
+        game.map._tiles._asset["forest"] = $.extend(game.map._tiles._asset["forest"], game.asset.obj, { type: "land", move: 1, clipY: (rowHeight * 1), clipWidth: colWidth, clipHeight: rowHeight });
+        game.map._tiles._asset["water"] = $.extend(game.map._tiles._asset["water"], game.asset.obj, { type: "land", move: 100, clipY: (rowHeight * 2), clipWidth: colWidth, clipHeight: rowHeight });
+        game.map._tiles._asset["mountain"] = $.extend(game.map._tiles._asset["mountain"], game.asset.obj, { type: "land", move: 100, clipY: (rowHeight * 3), clipWidth: colWidth, clipHeight: rowHeight });
 
-        game.map._tiles._asset["water-0"] = $.extend(game.map._tiles._asset["water-0"], game.assetObj,{ clipX: ((colWidth + 1) * 5),    clipY: (rowHeight * 2),   clipWidth: colWidth,       clipHeight: (rowHeight / 2) });
-        game.map._tiles._asset["water-1"] = $.extend(game.map._tiles._asset["water-1"], game.assetObj,{ clipX: ((colWidth + 1) * 4.49), clipY: (rowHeight * 2),   clipWidth: (colWidth / 2), clipHeight: 45, xOffset: (colWidth / 2) });
-        game.map._tiles._asset["water-2"] = $.extend(game.map._tiles._asset["water-2"], game.assetObj,{ clipX: ((colWidth + 1) * 5.49), clipY: (rowHeight * 2.5), clipWidth: colWidth,       clipHeight: 55, xOffset: (colWidth / 2), yOffset: (rowHeight / 2) });
-        game.map._tiles._asset["water-3"] = $.extend(game.map._tiles._asset["water-3"], game.assetObj,{ clipX: ((colWidth + 1) * 4),    clipY: (rowHeight * 2.7), clipWidth: colWidth,       clipHeight: 20, yOffset: 50 });
-        game.map._tiles._asset["water-4"] = $.extend(game.map._tiles._asset["water-4"], game.assetObj,{ clipX: ((colWidth + 1) * 5),    clipY: (rowHeight * 2.5), clipWidth: (colWidth / 2), clipHeight: 55, yOffset: (rowHeight / 2) });
-        game.map._tiles._asset["water-5"] = $.extend(game.map._tiles._asset["water-5"], game.assetObj,{ clipX: ((colWidth + 1) * 4),    clipY: (rowHeight * 2),   clipWidth: (colWidth / 2), clipHeight: 45 });
+        game.map._tiles._asset["water-0"] = $.extend(game.map._tiles._asset["water-0"], game.asset.obj,{ clipX: ((colWidth + 1) * 5),    clipY: (rowHeight * 2),   clipWidth: colWidth,       clipHeight: (rowHeight / 2) });
+        game.map._tiles._asset["water-1"] = $.extend(game.map._tiles._asset["water-1"], game.asset.obj,{ clipX: ((colWidth + 1) * 4.49), clipY: (rowHeight * 2),   clipWidth: (colWidth / 2), clipHeight: 45, xOffset: (colWidth / 2) });
+        game.map._tiles._asset["water-2"] = $.extend(game.map._tiles._asset["water-2"], game.asset.obj,{ clipX: ((colWidth + 1) * 5.49), clipY: (rowHeight * 2.5), clipWidth: colWidth,       clipHeight: 55, xOffset: (colWidth / 2), yOffset: (rowHeight / 2) });
+        game.map._tiles._asset["water-3"] = $.extend(game.map._tiles._asset["water-3"], game.asset.obj,{ clipX: ((colWidth + 1) * 4),    clipY: (rowHeight * 2.7), clipWidth: colWidth,       clipHeight: 20, yOffset: 50 });
+        game.map._tiles._asset["water-4"] = $.extend(game.map._tiles._asset["water-4"], game.asset.obj,{ clipX: ((colWidth + 1) * 5),    clipY: (rowHeight * 2.5), clipWidth: (colWidth / 2), clipHeight: 55, yOffset: (rowHeight / 2) });
+        game.map._tiles._asset["water-5"] = $.extend(game.map._tiles._asset["water-5"], game.asset.obj,{ clipX: ((colWidth + 1) * 4),    clipY: (rowHeight * 2),   clipWidth: (colWidth / 2), clipHeight: 45 });
 
-        game.map._tiles._asset["red"] = $.extend(game.map._tiles._asset["red"], game.assetObj, { type: "overlay", clipX: ((colWidth + 1) * 7), clipWidth: colWidth, clipHeight: rowHeight });
-        game.map._tiles._asset["white"] = $.extend(game.map._tiles._asset["white"], game.assetObj, { type: "overlay", clipX: ((colWidth + 1) * 8), clipWidth: colWidth, clipHeight: rowHeight });
+        game.map._tiles._asset["red"] = $.extend(game.map._tiles._asset["red"], game.asset.obj, { type: "overlay", clipX: ((colWidth + 1) * 7), clipWidth: colWidth, clipHeight: rowHeight });
+        game.map._tiles._asset["white"] = $.extend(game.map._tiles._asset["white"], game.asset.obj, { type: "overlay", clipX: ((colWidth + 1) * 8), clipWidth: colWidth, clipHeight: rowHeight });
+        game.map._tiles._asset["border"] = $.extend(game.map._tiles._asset["border"], game.asset.obj, { type: "overlay", clipX: ((colWidth + 1) * 9), clipWidth: colWidth, clipHeight: rowHeight });
 
-        game.map._tiles._asset["dwarf-spear"] = $.extend(game.map._tiles._asset["dwarf-spear"], game.assetObj, { type: "troop", move: 2, clipX: ((colWidth + 1) * 7), clipY: rowHeight, clipWidth: colWidth, clipHeight: rowHeight });
+        game.map._tiles._asset["dwarf-spear"] = $.extend(game.map._tiles._asset["dwarf-spear"], game.asset.obj, { type: "troop", move: 2, clipX: ((colWidth + 1) * 7), clipY: rowHeight, clipWidth: colWidth, clipHeight: rowHeight });
+
+        game.map._tiles._asset["village"] = $.extend(game.map._tiles._asset["village"], game.asset.obj, { type: "settlement", clipX: ((colWidth + 1) * 6), clipY: (rowHeight * 3), clipWidth: colWidth, clipHeight: rowHeight });
 
         game.map.drawGrid();
     });
@@ -74,6 +88,22 @@ game.loadMap = function()
 
                 break;
             case 2: // middle
+                if (game.distSrc == null)
+                    game.distSrc = game.map.getClickedHex(mouseX, mouseY);
+                else
+                {
+                    var destHex = game.map.getClickedHex(mouseX, mouseY);
+                    var distance = game.map.distanceToo(game.distSrc, destHex);
+
+                    var html = "Src Hex: x=" + game.distSrc.x + ", y=" + game.distSrc.y + "</br>"
+                             + "Dest Hex: x=" + destHex.x + ", y=" + destHex.y + "</br>"
+                             + "Distance: " + distance;
+
+                    utils.alert(html, { "width": 300, "height": 500 });
+
+                    game.distSrc = null;
+
+                }
                 break;
             case 3: // right
                 var pos = game.map.getClickedHex(mouseX, mouseY);
@@ -93,14 +123,7 @@ game.loadMap = function()
     });
 }
 
-game.assetObj = {
-    type: "",
-    move: -1,
-    clipX: 0,
-    clipY: 0,
-    clipWidth: 0,
-    clipHeight: 0
-}
+
 
 game.generateRandomGrid = function(map, width, height)
 {
@@ -110,17 +133,26 @@ game.generateRandomGrid = function(map, width, height)
         map._hexs[x] = [];
         for (var y = 0; y < height; y++)
         {
-            var rand = Math.random();
-            if (rand < 0.4)
-            {
-                map._hexs[x][y] = ["grass"];
-                if (rand < 0.05)
-                    game.map._troops.push(new game.troop(x, y, "dwarf-spear"));
-            }
-            else if (rand < 0.8)
-                map._hexs[x][y] = ["grass", "forest"];
+            if (map._debug)
+                map._hexs[x][y] = ["grass", "border"]
             else
-                map._hexs[x][y] = ["water"];
+            {
+                var rand = Math.random();
+                if (rand < 0.3)
+                {
+                    map._hexs[x][y] = ["grass"];
+                    if (rand < 0.05)
+                        game.map._troops.push(new game.troop(x, y, "dwarf-spear"));
+                    if (rand > 0.25)
+                        game.map._hexs[x][y].push("village");
+                }
+                else if (rand < 0.6)
+                    map._hexs[x][y] = ["grass", "forest"];
+                else if (rand < 0.8)
+                    map._hexs[x][y] = ["water"];
+                else
+                    map._hexs[x][y] = ["grass", "mountain"];
+            }
         }
     }
 
@@ -187,6 +219,31 @@ game.hexClicked = function (pos)
         }
         return true;
     }
+    else
+    {
+        var maxPop = 20;
+        var minPop = 1;
+        var fakePopulation = Math.floor(Math.random() * (maxPop - minPop + 1)) + minPop;
+        
+        var income = game.asset.calcRegionIncome(pos.x, pos.y, fakePopulation);
+        var expenditure = game.asset.calcExpenditure(fakePopulation);
+        
+        var msg = "A village of population " + fakePopulation + " here, would produce: ";
+        for (var member in income)
+        {
+            msg += "<div>" + member + ": " + utils.roundTo(income[member],2) + "</div>";
+        }
+        msg += "<br />and would consume: ";
+        for(var member in expenditure)
+        {
+            msg += "<div>" + member + ": " + utils.roundTo(expenditure[member],2) + "</div>"
+        }
+
+
+        utils.alert(msg, { "height": 400, "width": 450 });
+
+    }
+
 
     game.action = null;
     return true;
@@ -221,7 +278,7 @@ game.troop = function (x, y, name)
 
 game.mapObj = function (elId)
 {
-    this._debug = false;
+    this._debug = game.debug;
     this._element = document.getElementById(elId);
     this._tiles = null;
     this._hexs = null;
@@ -364,8 +421,16 @@ game.mapObj = function (elId)
         return false;
     }
 
+    this.distanceToo = function (src, dest)
+    {
+        xDist = Math.abs(src.x - dest.x);
+        yDist = Math.abs(src.y - dest.y);
+        
+        return Math.max(xDist, yDist);
+    }
+
     this.hexAssets = function (x, y, filter)
-{
+    {
         if (that._debug)
             $("#debugDisplay").append("hexAssets: x:" + x + ",y:" + y + "</br>");
 
@@ -470,6 +535,39 @@ game.mapObj = function (elId)
         else
             ctx.drawImage(that._tiles._img, asset.clipX, asset.clipY, asset.clipWidth, asset.clipHeight, oddXOffset + ((x - 1) * (xOffset / 2)) + addXOffset, oddYOffset + (y * yOffset) + addYOffset, asset.clipWidth, asset.clipHeight);
     }
+
+    this.getNeighboursAtRange = function (x, y, range)
+    {
+        var reply = [];
+
+        if (range == 1)
+        {
+            reply[0] = { "x": x, "y": (y - 1) };
+            reply[1] = ((x % 2) == 0 ? { "x": (x + 1), "y": (y - 1) } : { "x": (x + 1), "y": y });
+            reply[2] = ((x % 2) == 0 ? { "x": (x + 1), "y": y } : { "x": (x + 1), "y": (y + 1) });
+            reply[3] = { "x": x, "y": (y + 1) };
+            reply[4] = ((x % 2) == 0 ? { "x": (x - 1), "y": y } : { "x": (x - 1), "y": (y + 1) });
+            reply[5] = ((x % 2) == 0 ? { "x": (x - 1), "y": (y - 1) } : { "x": (x - 1), "y": y });
+        }
+        else if (range == 2)
+        {
+            reply[0] = { "x": x, "y": (y - 2) };
+            reply[1] = ((x % 2) == 0 ? { "x": (x + 1), "y": (y - 2) } : { "x": (x + 1), "y": (y - 1) });
+            reply[2] = { "x": (x + 2), "y": (y - 1) };
+            reply[3] = { "x": (x + 2), "y": y };
+            reply[4] = { "x": (x + 2), "y": (y + 1) };
+            reply[5] = ((x % 2) == 0 ? { "x": (x + 1), "y": (y + 1) } : { "x": (x + 1), "y": (y + 2) });
+            reply[6] = { "x": x, "y": (y + 2) };
+            reply[7] = ((x % 2) == 0 ? { "x": (x - 1), "y": (y + 1) } : { "x": (x - 1), "y": (y + 2) });
+            reply[8] = { "x": (x - 2), "y": (y + 1) };
+            reply[9] = { "x": (x - 2), "y": y };
+            reply[10] = { "x": (x - 2), "y": (y - 1) };
+            reply[11] = ((x % 2) == 0 ? { "x": (x - 1), "y": (y - 2) } : { "x": (x - 1), "y": (y - 1) });
+        }
+
+        return reply;
+    }
+
     this.getNeighbours = function (x, y, maxMove)
     {
         if (that._debug)

@@ -18,6 +18,20 @@
 
 Namespace("utils");
 
+utils.roundTo = function (number, dps)
+{
+    var multi = "1";
+    for (var i = 0; i < dps; i++)
+    {
+        multi += "0";
+    }
+    multi = parseInt(multi);
+    
+    return Math.round(number * multi) / multi;
+
+    
+}
+
 utils.createUUID = function ()
 {
     function s4()
@@ -28,4 +42,24 @@ utils.createUUID = function ()
     }
     return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
         s4() + '-' + s4() + s4() + s4();
+}
+
+utils.alert = function (text, options)
+{
+    options = $.extend({ "width" : 200, "height": 100 }, options);
+    
+    var id = utils.createUUID();
+    var html = "<div title='Alert' id='" + id + "'>"
+             + "<div >" + text + "</div>"
+             + "</div>";
+
+    $(html).dialog({
+        width: options.width,
+        height: options.height,
+        modal: true,
+        close: function() { $(this).empty().remove(); },
+        buttons: {
+            "OK": function () { $(this).dialog("close"); }
+        }
+    });
 }
